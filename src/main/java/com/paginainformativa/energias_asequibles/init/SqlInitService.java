@@ -11,7 +11,6 @@ public class SqlInitService {
     private JdbcTemplate jdbcTemplate;
 
     //=========================================== Procedimientos almacenados ===========================================
-
     public void crearProcedimientosUsuario() {
         jdbcTemplate.execute("DROP PROCEDURE IF EXISTS guardar_usuario");
         jdbcTemplate.execute("""
@@ -57,7 +56,6 @@ public class SqlInitService {
 
         System.out.println("✅ Procedimientos de usuario creados");
     }
-
 
     public void crearProcedimientosAlarma() {
         // guardar_alarma
@@ -486,8 +484,6 @@ public class SqlInitService {
     }
 
     // =========================================== Vistas ===========================================
-
-
     public void crearVistas() {
         // vista_alarmas
         jdbcTemplate.execute("DROP VIEW IF EXISTS vista_alarmas");
@@ -621,8 +617,328 @@ public class SqlInitService {
                     FROM roles
                 """);
 
-
         System.out.println("✅ Vistas creadas exitosamente");
+    }
+    
+    public void crearCursores() {
+
+        // 1. activar_usuarios_inactivos
+        jdbcTemplate.execute("DROP PROCEDURE IF EXISTS activar_usuarios_inactivos");
+        jdbcTemplate.execute("""
+   CREATE PROCEDURE activar_usuarios_inactivos()
+   BEGIN
+       DECLARE done INT DEFAULT FALSE;
+       DECLARE v_id BIGINT;
+       DECLARE cur CURSOR FOR SELECT id FROM usuarios WHERE activo = FALSE;
+       DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+
+       OPEN cur;
+       leer: LOOP
+           FETCH cur INTO v_id;
+           IF done THEN LEAVE leer; END IF;
+           UPDATE usuarios SET activo = TRUE WHERE id = v_id;
+       END LOOP;
+       CLOSE cur;
+   END
+""");
+
+        // 2. marcar_proyectos_vacios_inactivos
+        jdbcTemplate.execute("DROP PROCEDURE IF EXISTS marcar_proyectos_vacios_inactivos");
+        jdbcTemplate.execute("""
+   CREATE PROCEDURE marcar_proyectos_vacios_inactivos()
+   BEGIN
+       DECLARE done INT DEFAULT FALSE;
+       DECLARE v_id BIGINT;
+       DECLARE cur CURSOR FOR SELECT id FROM proyectos WHERE descripcion IS NULL OR descripcion = '';
+       DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+
+       OPEN cur;
+       leer: LOOP
+           FETCH cur INTO v_id;
+           IF done THEN LEAVE leer; END IF;
+           UPDATE proyectos SET activo = FALSE WHERE id = v_id;
+       END LOOP;
+       CLOSE cur;
+   END
+""");
+
+        // 3. ajustar_presupuestos_bajos
+        jdbcTemplate.execute("DROP PROCEDURE IF EXISTS ajustar_presupuestos_bajos");
+        jdbcTemplate.execute("""
+   CREATE PROCEDURE ajustar_presupuestos_bajos()
+   BEGIN
+       DECLARE done INT DEFAULT FALSE;
+       DECLARE v_id BIGINT;
+       DECLARE cur CURSOR FOR SELECT id FROM presupuestos WHERE valor < 100;
+       DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+
+       OPEN cur;
+       leer: LOOP
+           FETCH cur INTO v_id;
+           IF done THEN LEAVE leer; END IF;
+           UPDATE presupuestos SET valor = 100 WHERE id = v_id;
+       END LOOP;
+       CLOSE cur;
+   END
+""");
+
+        // 4. validar_noticias_sin_titulo
+        jdbcTemplate.execute("DROP PROCEDURE IF EXISTS validar_noticias_sin_titulo");
+        jdbcTemplate.execute("""
+   CREATE PROCEDURE validar_noticias_sin_titulo()
+   BEGIN
+       DECLARE done INT DEFAULT FALSE;
+       DECLARE v_id BIGINT;
+       DECLARE cur CURSOR FOR SELECT id FROM noticias WHERE titulo IS NULL OR titulo = '';
+       DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+
+       OPEN cur;
+       leer: LOOP
+           FETCH cur INTO v_id;
+           IF done THEN LEAVE leer; END IF;
+           UPDATE noticias SET titulo = 'Sin título' WHERE id = v_id;
+       END LOOP;
+       CLOSE cur;
+   END
+""");
+
+        // 5. refrescar_rendimientos
+        jdbcTemplate.execute("DROP PROCEDURE IF EXISTS refrescar_rendimientos");
+        jdbcTemplate.execute("""
+   CREATE PROCEDURE refrescar_rendimientos()
+   BEGIN
+       DECLARE done INT DEFAULT FALSE;
+       DECLARE v_id BIGINT;
+       DECLARE cur CURSOR FOR SELECT id FROM indicadores;
+       DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+
+       OPEN cur;
+       leer: LOOP
+           FETCH cur INTO v_id;
+           IF done THEN LEAVE leer; END IF;
+           UPDATE indicadores SET rendimiento = rendimiento + 1 WHERE id = v_id;
+       END LOOP;
+       CLOSE cur;
+   END
+""");
+
+        // 6. etiquetar_alarmas_urgentes (antes activar_alarmas)
+        jdbcTemplate.execute("DROP PROCEDURE IF EXISTS etiquetar_alarmas_urgentes");
+        jdbcTemplate.execute("""
+   CREATE PROCEDURE etiquetar_alarmas_urgentes()
+   BEGIN
+       DECLARE done INT DEFAULT FALSE;
+       DECLARE v_id BIGINT;
+       DECLARE cur CURSOR FOR SELECT id FROM alarmas WHERE criticidad = 'ALTA';
+       DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+
+       OPEN cur;
+       leer: LOOP
+           FETCH cur INTO v_id;
+           IF done THEN LEAVE leer; END IF;
+           UPDATE alarmas SET descripcion = CONCAT('[URGENTE] ', descripcion) WHERE id = v_id;
+       END LOOP;
+       CLOSE cur;
+   END
+""");
+
+        // 7. limpiar_opciones_menu
+        jdbcTemplate.execute("DROP PROCEDURE IF EXISTS limpiar_opciones_menu");
+        jdbcTemplate.execute("""
+   CREATE PROCEDURE limpiar_opciones_menu()
+   BEGIN
+       DECLARE done INT DEFAULT FALSE;
+       DECLARE v_id BIGINT;
+       DECLARE cur CURSOR FOR SELECT id FROM opciones_menu WHERE nombre IS NULL;
+       DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+
+       OPEN cur;
+       leer: LOOP
+           FETCH cur INTO v_id;
+           IF done THEN LEAVE leer; END IF;
+           UPDATE opciones_menu SET nombre = 'Sin nombre' WHERE id = v_id;
+       END LOOP;
+       CLOSE cur;
+   END
+""");
+
+        // 8. marcar_reportes_inactivos
+        jdbcTemplate.execute("DROP PROCEDURE IF EXISTS marcar_reportes_inactivos");
+        jdbcTemplate.execute("""
+   CREATE PROCEDURE marcar_reportes_inactivos()
+   BEGIN
+       DECLARE done INT DEFAULT FALSE;
+       DECLARE v_id BIGINT;
+       DECLARE cur CURSOR FOR SELECT id FROM reportes WHERE informacion IS NULL;
+       DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+
+       OPEN cur;
+       leer: LOOP
+           FETCH cur INTO v_id;
+           IF done THEN LEAVE leer; END IF;
+           UPDATE reportes SET activo = FALSE WHERE id = v_id;
+       END LOOP;
+       CLOSE cur;
+   END
+""");
+
+        // 9. activar_informaciones
+        jdbcTemplate.execute("DROP PROCEDURE IF EXISTS activar_informaciones");
+        jdbcTemplate.execute("""
+   CREATE PROCEDURE activar_informaciones()
+   BEGIN
+       DECLARE done INT DEFAULT FALSE;
+       DECLARE v_id BIGINT;
+       DECLARE cur CURSOR FOR SELECT id FROM informaciones WHERE info_texto IS NOT NULL;
+       DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+
+       OPEN cur;
+       leer: LOOP
+           FETCH cur INTO v_id;
+           IF done THEN LEAVE leer; END IF;
+           UPDATE informaciones SET activo = TRUE WHERE id = v_id;
+       END LOOP;
+       CLOSE cur;
+   END
+""");
+
+        // 10. corregir_roles_null
+        jdbcTemplate.execute("DROP PROCEDURE IF EXISTS corregir_roles_null");
+        jdbcTemplate.execute("""
+   CREATE PROCEDURE corregir_roles_null()
+   BEGIN
+       DECLARE done INT DEFAULT FALSE;
+       DECLARE v_id BIGINT;
+       DECLARE cur CURSOR FOR SELECT id FROM roles WHERE tipo IS NULL;
+       DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+
+       OPEN cur;
+       leer: LOOP
+           FETCH cur INTO v_id;
+           IF done THEN LEAVE leer; END IF;
+           UPDATE roles SET tipo = 'Invitado' WHERE id = v_id;
+       END LOOP;
+       CLOSE cur;
+   END
+""");
+
+        // 11. normalizar_nombres_energias (nuevo)
+        jdbcTemplate.execute("DROP PROCEDURE IF EXISTS normalizar_nombres_energias");
+        jdbcTemplate.execute("""
+   CREATE PROCEDURE normalizar_nombres_energias()
+   BEGIN
+       DECLARE done INT DEFAULT FALSE;
+       DECLARE v_id BIGINT;
+       DECLARE v_nombre VARCHAR(255);
+       DECLARE cur CURSOR FOR SELECT id, nombre FROM energias WHERE nombre = LOWER(nombre);
+       DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+
+       OPEN cur;
+       leer: LOOP
+           FETCH cur INTO v_id, v_nombre;
+           IF done THEN LEAVE leer; END IF;
+           UPDATE energias SET nombre = CONCAT(UPPER(SUBSTRING(v_nombre, 1, 1)), LOWER(SUBSTRING(v_nombre, 2))) WHERE id = v_id;
+       END LOOP;
+       CLOSE cur;
+   END
+""");
+
+        // 12. limpiar_informaciones_vacias (nuevo)
+        jdbcTemplate.execute("DROP PROCEDURE IF EXISTS limpiar_informaciones_vacias");
+        jdbcTemplate.execute("""
+   CREATE PROCEDURE limpiar_informaciones_vacias()
+   BEGIN
+       DECLARE done INT DEFAULT FALSE;
+       DECLARE v_id BIGINT;
+       DECLARE cur CURSOR FOR SELECT id FROM informaciones WHERE info_texto IS NULL OR info_texto = '';
+       DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+
+       OPEN cur;
+       leer: LOOP
+           FETCH cur INTO v_id;
+           IF done THEN LEAVE leer; END IF;
+           UPDATE informaciones SET info_texto = 'Sin información disponible' WHERE id = v_id;
+       END LOOP;
+       CLOSE cur;
+   END
+""");
+
+        // 13. cambiar_criticidad_baja
+        jdbcTemplate.execute("DROP PROCEDURE IF EXISTS cambiar_criticidad_baja");
+        jdbcTemplate.execute("""
+   CREATE PROCEDURE cambiar_criticidad_baja()
+   BEGIN
+       DECLARE done INT DEFAULT FALSE;
+       DECLARE v_id BIGINT;
+       DECLARE cur CURSOR FOR SELECT id FROM alarmas WHERE criticidad IS NULL;
+       DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+
+       OPEN cur;
+       leer: LOOP
+           FETCH cur INTO v_id;
+           IF done THEN LEAVE leer; END IF;
+           UPDATE alarmas SET criticidad = 'BAJA' WHERE id = v_id;
+       END LOOP;
+       CLOSE cur;
+   END
+""");
+
+        // 14. inicializar_indicadores
+        jdbcTemplate.execute("DROP PROCEDURE IF EXISTS inicializar_indicadores");
+        jdbcTemplate.execute("""
+   CREATE PROCEDURE inicializar_indicadores()
+   BEGIN
+       DECLARE done INT DEFAULT FALSE;
+       DECLARE v_id BIGINT;
+       DECLARE cur CURSOR FOR SELECT id FROM indicadores WHERE rendimiento IS NULL;
+       DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+
+       OPEN cur;
+       leer: LOOP
+           FETCH cur INTO v_id;
+           IF done THEN LEAVE leer; END IF;
+           UPDATE indicadores SET rendimiento = 0 WHERE id = v_id;
+       END LOOP;
+       CLOSE cur;
+   END
+""");
+
+        // 15. actualizar_titulos_noticias
+        jdbcTemplate.execute("DROP PROCEDURE IF EXISTS actualizar_titulos_noticias");
+        jdbcTemplate.execute("""
+   CREATE PROCEDURE actualizar_titulos_noticias()
+   BEGIN
+       DECLARE done INT DEFAULT FALSE;
+       DECLARE v_id BIGINT;
+       DECLARE cur CURSOR FOR SELECT id FROM noticias WHERE titulo = '';
+       DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+
+       OPEN cur;
+       leer: LOOP
+           FETCH cur INTO v_id;
+           IF done THEN LEAVE leer; END IF;
+           UPDATE noticias SET titulo = 'Título no definido' WHERE id = v_id;
+       END LOOP;
+       CLOSE cur;
+   END
+""");
+
+        System.out.println("✅ Cursores creados correctamente (15/15)");
     }
 
 
