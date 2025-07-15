@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Inicio de Sesión</title>
+        <style>
+            html, body {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                font-family: sans-serif;
+                background-image: url('/img/pexels-narcisa-aciko-541222-1292464.jpg');
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+                color: white;
+            }
+
+            .page-container {
+                position: relative;
+                height: 100vh;
+                width: 100%;
+            }
+
+            /* Contenedor centrado pero un poco más arriba */
+            .center-wrapper {
+                position: absolute;
+                top: 30%; /* Cambiado de 50% a 40% para subir el bloque */
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            .login-container {
+                background-color: rgba(0, 0, 0, 0.6);
+                padding: 40px;
+                border-radius: 10px;
+                width: 300px;
+                text-align: center;
+                box-shadow: 0 0 15px rgba(0,0,0,0.7);
+            }
+
+            .login-container h1 {
+                margin-bottom: 25px;
+                font-size: 26px;
+            }
+
+            .input-group {
+                margin-bottom: 20px;
+                text-align: left;
+            }
+
+            .input-group label {
+                display: block;
+                margin-bottom: 5px;
+            }
+
+            .input-group input {
+                padding: 10px;
+                border: none;
+                border-radius: 5px;
+                width: 100%;
+            }
+
+            .login-container button {
+                background-color: #ddd;
+                color: black;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                margin-top: 20px;
+                width: 100%;
+            }
+
+            .signup-link {
+                color: white;
+                margin-top: 10px;
+                font-size: 14px;
+                display: block;
+                text-align: center;
+            }
+
+            .alert-danger {
+                background-color: rgba(255, 0, 0, 0.9);
+                color: white;
+                font-size: 20px;
+                font-weight: bold;
+                padding: 15px;
+                border-radius: 5px;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+
+            /* Footer más grande y visualmente fuerte */
+            footer {
+                position: absolute;
+                bottom: 0;
+                width: 100%;
+                padding: 40px 0;
+                text-align: center;
+            }
+
+            .footer-text {
+                font-size: 60px;
+                color: white;
+                margin: 0;
+            }
+        </style>
+    </head>
+    <body>
+
+        <div class="page-container">
+
+            <!-- Contenedor centrado más arriba -->
+            <div class="center-wrapper">
+                <div class="login-container">
+
+                    <h1>----- Inicio de Sesión -----</h1>
+
+                    <div th:if="${param.error}" class="alert-danger">
+                        Usuario o contraseña incorrectos.
+                    </div>
+
+                    <form method="POST" action="/login">
+                        <div class="input-group">
+                            <label for="usuario">Usuario:</label>
+                            <input type="text" id="usuario" name="username" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="contrasena">Contraseña:</label>
+                            <input type="password" id="contrasena" name="password" required>
+                        </div>
+                        <a href="/usuarios/formulario" class="signup-link">CREAR NUEVO USUARIO</a>
+                        <button type="submit">INGRESAR</button>
+                    </form>
+
+                </div>
+            </div>
+
+
+            <footer>
+                <p class="footer-text">ENERGIAS ASEQUIBLES Y NO CONTAMINANTES</p>
+            </footer>
+
+        </div>
+
+    </body>
+</html>

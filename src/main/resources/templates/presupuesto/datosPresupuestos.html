@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head>
+        <title>Nuevo Presupuesto</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: sans-serif;
+                background: white;
+                color: white;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+            }
+
+            .form-container {
+                background-color: rgba(0, 0, 0, 0.6);
+                border-radius: 10px;
+                padding: 40px;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+                text-align: center;
+                max-width: 500px;
+                width: 100%;
+            }
+
+            h1 {
+                margin-bottom: 30px;
+                font-size: 24px;
+                color: #ffffff;
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+                text-align: left;
+            }
+
+            .form-group label {
+                display: block;
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+
+            .form-group input {
+                width: 100%;
+                padding: 10px;
+                border: none;
+                border-radius: 5px;
+            }
+
+            .form-buttons {
+                margin-top: 20px;
+            }
+
+            .form-buttons button {
+                background-color: #3498db;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                margin: 0 10px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-weight: bold;
+                transition: background-color 0.3s ease;
+            }
+
+            .form-buttons button:hover {
+                background-color: #2980b9;
+            }
+
+            .form-image {
+                margin-top: 30px;
+            }
+
+            .form-image img {
+                max-width: 100%;
+                height: auto;
+                border-radius: 10px;
+                box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+            }
+            .btn-regresar {
+                display: inline-block;
+                background-color: #3498db;
+                color: white;
+                padding: 10px 20px;
+                margin: 0 10px;
+                border-radius: 5px;
+                text-decoration: none;
+                font-weight: bold;
+                transition: background-color 0.3s ease;
+            }
+            .select-rol {
+                width: 100%;
+                padding: 10px;
+                border-radius: 5px;
+                border: none;
+                background-color: #f1f1f1;
+                font-size: 16px;
+                color: #333;
+                box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.2);
+                transition: box-shadow 0.3s ease;
+            }
+
+        </style>
+    </head>
+
+    <body>
+        <div class="form-container">
+            <h1 th:text="${presupuesto.id == null} ? 'Nuevo Presupuesto' : 'Editar Presupuesto'">DATOS DE PRESUPUESTO</h1>
+            <form th:action="@{/presupuestos/guardar}" th:object="${presupuesto}" method="post">
+
+                <!-- Campo oculto para mantener el ID -->
+                <input type="hidden" th:field="*{id}" />
+
+                <div class="form-group">
+                    <label for="proyecto">Proyecto relacionado:</label>
+                    <select id="proyecto" th:field="*{proyecto.id}" class="select-proyecto">
+                        <option th:each="p : ${proyectos}" th:value="${p.id}" th:text="${p.nombre}"></option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="valor">Valor($):</label>
+                    <input type="number" id="valor" th:field="*{valor}" step="0.01" />
+                </div>
+
+                <div class="form-buttons">
+                    <a href="/presupuestos" class="btn-regresar">REGRESAR</a>
+                    <button type="submit">GUARDAR</button>
+                </div>
+
+                <div class="form-image">
+                    <img src="/img/pexels-ahmetyuksek-29758551.jpg" alt="Energía Eolica">
+                </div>
+            </form>
+        </div>
+    </body>
+</html>

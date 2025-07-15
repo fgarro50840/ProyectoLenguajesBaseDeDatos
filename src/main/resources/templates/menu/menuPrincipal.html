@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head>
+        <title>Menu Principal</title>
+        <style>
+            body {
+                background-image: url('/img/pexels-narcisa-aciko-541222-1292464.jpg');
+                background-size: cover;
+                background-position: center;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                margin: 0;
+                color: white;
+                font-family: sans-serif;
+            }
+
+            .menu-container {
+                background-color: rgba(255, 255, 255, 0.2); /* Fondo blanco transparente */
+                padding: 20px;
+                border-radius: 10px;
+                text-align: center;
+                position: absolute;
+                top: 30%; /* Cambiado de 50% a 40% para subir el bloque */
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            .menu-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr); /* 3 columnas */
+                gap: 10px;
+                margin-top: 20px;
+            }
+
+            .menu-item {
+                background-color: rgba(255, 255, 255, 0.4); /* Fondo blanco más transparente */
+                padding: 20px;
+                border-radius: 10px;
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-decoration: none;
+            }
+
+            .menu-item img {
+                width: 50px; /* Ajusta el tamaño de los iconos */
+                margin-bottom: 10px;
+            }
+
+            .menu-item span {
+                font-size: 14px;
+                color: white;
+            }
+            footer {
+                position: absolute;
+                bottom: 0;
+                width: 100%;
+                padding: 40px 0;
+                text-align: center;
+            }
+
+            .footer-text {
+                font-size: 60px;
+                color: white;
+                margin: 0;
+            }
+            .page-container {
+                position: relative;
+                height: 100vh;
+                width: 100%;
+            }
+            .cerrar-sesion-item {
+                grid-column: 2 / 3; /* Coloca el ítem en la columna del centro */
+            }
+        </style>
+    </head>
+    <body>
+        <div class="page-container">
+
+            <div class="menu-container">
+                <h1>MENU PRINCIPAL</h1>
+                <div class="menu-grid">
+                    <a th:each="opcion : ${opcionesMenu}"
+                       th:if="${opcion.activo}"
+                       th:href="${{
+                                'Energías': '/energias',
+                                'Indicadores': '/indicadores',
+                                'Información': '/informaciones',
+                                'Proyectos': '/proyectos',
+                                'Noticias': '/noticias',
+                                'Presupuestos': '/presupuestos',
+                                'Reportes': '/reportes',
+                                'Alarmas': '/alarmas'
+                            }[opcion.nombre]}"
+                            class="menu-item">
+                            <img th:src="${{
+                                'Energías': '/img/1.png',
+                                'Indicadores': '/img/Rendimiento.png',
+                                'Información': '/img/Informacion.png',
+                                'Proyectos': '/img/Proyectos.png',
+                                'Noticias': '/img/Noticias.png',
+                                'Presupuestos': '/img/Presupuestos.png',
+                                'Reportes': '/img/Reportes.png',
+                                'Alarmas': '/img/Alarmas.png'
+                            }[opcion.nombre]}"
+                            th:alt="${opcion.nombre}" />
+
+                        <span th:text="${opcion.nombre}">Nombre</span>
+                    </a>
+                    <a sec:authorize="hasRole('ADMIN')" href="/opcionesMenu" class="menu-item">
+                        <img src="img/Favoritos.png" alt="Mostrar / No Mostrar">
+                            <span>MOSTRAR / NO MOSTRAR</span>
+                    </a>
+                    <a sec:authorize="hasRole('ADMIN')" href="/usuarios" class="menu-item">
+                        <img src="img/Config.jpg" alt="Usuarios">
+                            <span>USUARIOS</span>
+                    </a>
+                    <a href="/logout" class="menu-item cerrar-sesion-item">
+                        <img src="img/png-clipart-computer-icons-check-out-favicon-sign-out-mi.png" alt="Cerrar Sesion">
+                            <span>CERRAR SESION</span>
+                    </a>
+            </div>
+                     
+            <!--              
+ <p sec:authorize="isAuthenticated()">Estoy logueado</p> 
+ <p sec:authorize="hasRole('ADMIN')">Soy admin</p>               
+-->
+
+</div>
+<footer>
+    <p class="footer-text">ENERGIAS ASEQUIBLES Y NO CONTAMINANTES</p>
+</footer>
+</div>
+
+</body>
+</html>

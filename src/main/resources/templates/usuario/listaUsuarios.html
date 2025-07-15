@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head>
+        <title>Lista de Usuarios</title>
+        <style>
+            body {
+                background-image: url('/img/pexels-ahmetyuksek-29758551.jpg');
+                background-size: cover;
+                background-position: center;
+                margin: 0;
+                padding: 0;
+                font-family: sans-serif;
+                color: black;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                height: 100vh;
+            }
+
+            .table-container {
+                max-width: 900px;
+                width: 100%;
+                margin: 20px;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+
+            th, td {
+                padding: 12px 15px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+                background-color: #ddd;
+            }
+
+            th {
+                background-color: #3498db;
+                color: white;
+            }
+
+            tr:hover {
+                background-color: #f1f1f1;
+            }
+
+            .btn-volver {
+                display: inline-block;
+                background-color: #3498db;
+                color: white;
+                padding: 10px 20px;
+                margin: 20px 0;
+                border-radius: 5px;
+                text-decoration: none;
+                font-weight: bold;
+                transition: background-color 0.3s ease;
+            }
+
+            .btn-volver:hover {
+                background-color: #2980b9;
+            }
+
+            .btn {
+                padding: 6px 12px;
+                border: none;
+                border-radius: 4px;
+                color: white;
+                font-weight: bold;
+                cursor: pointer;
+                margin-right: 5px;
+                text-decoration: none;
+            }
+
+            .btn-edit {
+                background-color: #f39c12;
+            }
+
+            .btn-deactivate {
+                background-color: #e74c3c;
+            }
+            .btn-activate {
+                background-color: darkgreen;
+            }
+
+            .btn-edit:hover {
+                background-color: #d68910;
+            }
+
+            .btn-deactivate:hover {
+                background-color: #c0392b;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1 style="color: white">Usuarios Registrados</h1>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Rol</th>
+                        <th>Activo</th>
+                        <th>Acciones a realizar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="usuario : ${usuarios}">
+                        <td th:text="${usuario.id}">1</td>
+                        <td th:text="${usuario.nombre}">Nombre</td>
+                        <td th:text="${usuario.rol.tipo}">Rol</td>
+                        <td th:text="${usuario.activo ? 'Sí' : 'No'}">Sí</td>
+                        <td>
+                            <a th:href="@{'/usuarios/formulario/' + ${usuario.id}}" class="btn btn-edit">Editar</a>
+                            <a th:if="${usuario.activo}" th:href="@{'/usuarios/desactivar/' + ${usuario.id}}" class="btn btn-deactivate">Desactivar</a>
+                            <a th:if="${!usuario.activo}" th:href="@{'/usuarios/reactivar/' + ${usuario.id}}" class="btn btn-activate">Activar</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <a href="/menu" class="btn-volver">Volver al Inicio</a>
+    </body>
+</html>

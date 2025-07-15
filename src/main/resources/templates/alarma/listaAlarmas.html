@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head>
+        <title>Lista de Energías</title>
+        <meta charset="UTF-8">
+            <style>
+                body {
+                    background-color: white;
+                    font-family: sans-serif;
+                    color: black;
+                    margin: 0;
+                    padding: 0;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                h1 {
+                    margin-top: 30px;
+                    color: #2c3e50;
+                }
+
+                table {
+                    margin-top: 30px;
+                    border-collapse: collapse;
+                    width: 80%;
+                    max-width: 800px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                }
+
+                th, td {
+                    padding: 12px 15px;
+                    border-bottom: 1px solid #ddd;
+                    text-align: left;
+                }
+
+                th {
+                    background-color: #3498db;
+                    color: white;
+                }
+
+                tr:hover {
+                    background-color: #f1f1f1;
+                }
+                .btn {
+                    padding: 6px 12px;
+                    border: none;
+                    border-radius: 4px;
+                    color: white;
+                    font-weight: bold;
+                    cursor: pointer;
+                    margin-right: 6px;
+                    text-decoration: none;
+                    display: inline-block;
+                }
+
+                .btn-edit {
+                    background-color: #f39c12;
+                }
+
+                .btn-delete {
+                    background-color: #c0392b;
+                }
+                .btn-activate {
+                    background-color: darkgreen;
+                }
+
+                .btn-edit:hover {
+                    background-color: #d68910;
+                }
+
+                .btn-deactivate:hover {
+                    background-color: #c0392b;
+                }
+                .btn-volver {
+                    display: inline-block;
+                    background-color: #3498db;
+                    color: white;
+                    padding: 10px 20px;
+                    margin: 20px 0;
+                    border-radius: 5px;
+                    text-decoration: none;
+                    font-weight: bold;
+                    transition: background-color 0.3s ease;
+                }
+
+                .btn-volver:hover {
+                    background-color: #2980b9;
+                }
+                .form-image img {
+                    width: 100%;
+                    height: 250px;
+                    object-fit: cover;
+                    border-radius: 10px;
+                    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+                }
+            </style>
+    </head>
+
+    <body>
+        <h1>Alarmas Actuales</h1>
+        <a sec:authorize="hasRole('ADMIN')"
+           th:href="@{'/alarmas/formulario'}" 
+           class="btn btn-edit">Agregar nueva Alarma
+        </a>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Criticidad</th>
+                    <th>Descripción</th>
+                    <th sec:authorize="hasRole('ADMIN')">Acciones a realizar</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="alarma : ${alarmas}">
+                    <td th:text="${alarma.id}">id</td>
+                    <td th:text="${alarma.nombre}">Nombre</td>
+                    <td th:text="${alarma.criticidad}">Criticidad</td>
+                    <td th:text="${alarma.descripcion}">Descripción</td>
+                    <td sec:authorize="hasRole('ADMIN')">
+                        <a th:href="@{'/alarmas/formulario/' + ${alarma.id}}" class="btn btn-edit">Editar</a>
+                        <a th:href="@{'/alarmas/eliminar/' + ${alarma.id}}" class="btn btn-delete">Eliminar</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <a href="/menu" class="btn-volver">Volver al Inicio</a>
+        <div class="form-image">
+            <img src="/img/pexels-pixabay-158826.jpg" alt="Alarma">
+        </div>
+    </body>
+</html>
