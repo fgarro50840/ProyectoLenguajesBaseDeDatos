@@ -619,7 +619,219 @@ public class SqlInitService {
 
         System.out.println("✅ Vistas creadas exitosamente");
     }
-    
+
+    // =========================================== Funciones ===========================================
+    public void crearFunciones() {
+
+        jdbcTemplate.execute("DROP FUNCTION IF EXISTS total_alarmas");
+        jdbcTemplate.execute("""
+               CREATE FUNCTION total_alarmas()
+               RETURNS INT
+               DETERMINISTIC
+               READS SQL DATA
+               BEGIN
+                   DECLARE total INT;
+                   SELECT COUNT(*) INTO total FROM alarmas;
+                   RETURN total;
+               END
+           """);
+
+        jdbcTemplate.execute("DROP FUNCTION IF EXISTS total_usuarios");
+        jdbcTemplate.execute("""
+               CREATE FUNCTION total_usuarios()
+               RETURNS INT
+               DETERMINISTIC
+               READS SQL DATA
+               BEGIN
+                   DECLARE total INT;
+                   SELECT COUNT(*) INTO total FROM usuarios;
+                   RETURN total;
+               END
+           """);
+
+        jdbcTemplate.execute("DROP FUNCTION IF EXISTS total_noticias");
+        jdbcTemplate.execute("""
+               CREATE FUNCTION total_noticias()
+               RETURNS INT
+               DETERMINISTIC
+               READS SQL DATA
+               BEGIN
+                   DECLARE total INT;
+                   SELECT COUNT(*) INTO total FROM noticias;
+                   RETURN total;
+               END
+           """);
+
+        jdbcTemplate.execute("DROP FUNCTION IF EXISTS total_presupuestos");
+        jdbcTemplate.execute("""
+               CREATE FUNCTION total_presupuestos()
+               RETURNS INT
+               DETERMINISTIC
+               READS SQL DATA
+               BEGIN
+                   DECLARE total INT;
+                   SELECT COUNT(*) INTO total FROM presupuestos;
+                   RETURN total;
+               END
+           """);
+
+        jdbcTemplate.execute("DROP FUNCTION IF EXISTS total_proyectos");
+        jdbcTemplate.execute("""
+               CREATE FUNCTION total_proyectos()
+               RETURNS INT
+               DETERMINISTIC
+               READS SQL DATA
+               BEGIN
+                   DECLARE total INT;
+                   SELECT COUNT(*) INTO total FROM proyectos;
+                   RETURN total;
+               END
+           """);
+
+        jdbcTemplate.execute("DROP FUNCTION IF EXISTS total_opciones_menu");
+        jdbcTemplate.execute("""
+               CREATE FUNCTION total_opciones_menu()
+               RETURNS INT
+               DETERMINISTIC
+               READS SQL DATA
+               BEGIN
+                   DECLARE total INT;
+                   SELECT COUNT(*) INTO total FROM opciones_menu;
+                   RETURN total;
+               END
+           """);
+
+        jdbcTemplate.execute("DROP FUNCTION IF EXISTS total_indicadores");
+        jdbcTemplate.execute("""
+               CREATE FUNCTION total_indicadores()
+               RETURNS INT
+               DETERMINISTIC
+               READS SQL DATA
+               BEGIN
+                   DECLARE total INT;
+                   SELECT COUNT(*) INTO total FROM indicadores;
+                   RETURN total;
+               END
+           """);
+
+        jdbcTemplate.execute("DROP FUNCTION IF EXISTS total_informaciones");
+        jdbcTemplate.execute("""
+               CREATE FUNCTION total_informaciones()
+               RETURNS INT
+               DETERMINISTIC
+               READS SQL DATA
+               BEGIN
+                   DECLARE total INT;
+                   SELECT COUNT(*) INTO total FROM informaciones;
+                   RETURN total;
+               END
+           """);
+
+        jdbcTemplate.execute("DROP FUNCTION IF EXISTS total_reportes");
+        jdbcTemplate.execute("""
+               CREATE FUNCTION total_reportes()
+               RETURNS INT
+               DETERMINISTIC
+               READS SQL DATA
+               BEGIN
+                   DECLARE total INT;
+                   SELECT COUNT(*) INTO total FROM reportes;
+                   RETURN total;
+               END
+           """);
+
+        jdbcTemplate.execute("DROP FUNCTION IF EXISTS total_energias");
+        jdbcTemplate.execute("""
+               CREATE FUNCTION total_energias()
+               RETURNS INT
+               DETERMINISTIC
+               READS SQL DATA
+               BEGIN
+                   DECLARE total INT;
+                   SELECT COUNT(*) INTO total FROM energias;
+                   RETURN total;
+               END
+           """);
+
+        jdbcTemplate.execute("DROP FUNCTION IF EXISTS total_roles");
+        jdbcTemplate.execute("""
+               CREATE FUNCTION total_roles()
+               RETURNS INT
+               DETERMINISTIC
+               READS SQL DATA
+               BEGIN
+                   DECLARE total INT;
+                   SELECT COUNT(*) INTO total FROM roles;
+                   RETURN total;
+               END
+           """);
+
+        jdbcTemplate.execute("DROP FUNCTION IF EXISTS usuario_activo");
+        jdbcTemplate.execute("""
+               CREATE FUNCTION usuario_activo(p_id BIGINT)
+               RETURNS TINYINT(1)
+               DETERMINISTIC
+               READS SQL DATA
+               BEGIN
+                   DECLARE v_activo TINYINT DEFAULT 0;
+                  
+                   SELECT activo INTO v_activo
+                   FROM usuarios
+                   WHERE id = p_id
+                   LIMIT 1;
+
+
+                   RETURN IF(v_activo = 1, 1, 0);
+               END
+           """);
+
+        jdbcTemplate.execute("DROP FUNCTION IF EXISTS proyecto_tiene_presupuestos");
+        jdbcTemplate.execute("""
+               CREATE FUNCTION proyecto_tiene_presupuestos(p_id BIGINT)
+               RETURNS INT
+               DETERMINISTIC
+               READS SQL DATA
+               BEGIN
+                   DECLARE total INT;
+                   SELECT COUNT(*) INTO total FROM presupuestos WHERE proyecto_id = p_id;
+                   RETURN total;
+               END
+           """);
+
+        jdbcTemplate.execute("DROP FUNCTION IF EXISTS energia_esta_asociada");
+        jdbcTemplate.execute("""
+               CREATE FUNCTION energia_esta_asociada(p_id BIGINT)
+               RETURNS BOOLEAN
+               DETERMINISTIC
+               READS SQL DATA
+               BEGIN
+                   DECLARE resultado BOOLEAN;
+                   SET resultado = (
+                       EXISTS(SELECT 1 FROM noticias WHERE energia_id = p_id) OR
+                       EXISTS(SELECT 1 FROM proyectos WHERE energia_id = p_id) OR
+                       EXISTS(SELECT 1 FROM informaciones WHERE energia_id = p_id)
+                   );
+                   RETURN resultado;
+               END
+           """);
+
+        jdbcTemplate.execute("DROP FUNCTION IF EXISTS promedio_rendimiento_proyecto");
+        jdbcTemplate.execute("""
+               CREATE FUNCTION promedio_rendimiento_proyecto(p_id BIGINT)
+               RETURNS DECIMAL(5,2)
+               DETERMINISTIC
+               READS SQL DATA
+               BEGIN
+                   DECLARE promedio DECIMAL(5,2);
+                   SELECT AVG(rendimiento) INTO promedio FROM indicadores WHERE proyecto_id = p_id;
+                   RETURN IFNULL(promedio, 0.00);
+               END
+           """);
+
+        System.out.println("✅ Funciones de totales creadas exitosamente");
+    }
+
+    // =========================================== Cursores ===========================================
     public void crearCursores() {
 
         // 1. activar_usuarios_inactivos
@@ -941,5 +1153,72 @@ public class SqlInitService {
         System.out.println("✅ Cursores creados correctamente (15/15)");
     }
 
+    // =========================================== Triggers ===========================================
+    public void crearTriggers() {
 
+        // 1. trg_usuario_default_activo
+        jdbcTemplate.execute("DROP TRIGGER IF EXISTS trg_usuario_default_activo");
+        jdbcTemplate.execute("""
+   CREATE TRIGGER trg_usuario_default_activo
+   BEFORE INSERT ON usuarios
+   FOR EACH ROW
+   BEGIN
+       IF NEW.activo IS NULL THEN
+           SET NEW.activo = TRUE;
+       END IF;
+   END
+""");
+
+        // 2. trg_proyecto_nombre_mayus
+        jdbcTemplate.execute("DROP TRIGGER IF EXISTS trg_proyecto_nombre_mayus");
+        jdbcTemplate.execute("""
+   CREATE TRIGGER trg_proyecto_nombre_mayus
+   BEFORE INSERT ON proyectos
+   FOR EACH ROW
+   BEGIN
+       SET NEW.nombre = UPPER(NEW.nombre);
+   END
+""");
+
+        // 3. trg_energia_nombre_trim
+        jdbcTemplate.execute("DROP TRIGGER IF EXISTS trg_energia_nombre_trim");
+        jdbcTemplate.execute("""
+   CREATE TRIGGER trg_energia_nombre_trim
+   BEFORE INSERT ON energias
+   FOR EACH ROW
+   BEGIN
+       SET NEW.nombre = TRIM(NEW.nombre);
+   END
+""");
+
+        // 4. trg_presupuesto_valor_min
+        jdbcTemplate.execute("DROP TRIGGER IF EXISTS trg_presupuesto_valor_min");
+        jdbcTemplate.execute("""
+   CREATE TRIGGER trg_presupuesto_valor_min
+   BEFORE INSERT ON presupuestos
+   FOR EACH ROW
+   BEGIN
+       IF NEW.valor < 100 THEN
+           SET NEW.valor = 100;
+       END IF;
+   END
+""");
+
+        // 5. trg_noticia_default_titulo
+        jdbcTemplate.execute("DROP TRIGGER IF EXISTS trg_noticia_default_titulo");
+        jdbcTemplate.execute("""
+   CREATE TRIGGER trg_noticia_default_titulo
+   BEFORE INSERT ON noticias
+   FOR EACH ROW
+   BEGIN
+       IF NEW.titulo IS NULL OR NEW.titulo = '' THEN
+           SET NEW.titulo = 'Sin título';
+       END IF;
+   END
+""");
+
+        System.out.println("✅ Triggers creados correctamente (5/5)");
+    }
+
+    
 }
